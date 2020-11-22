@@ -1,7 +1,6 @@
 from dns.resolver import Resolver
 from json import loads
 from subprocess import run as sub_run
-from time import time as utime
 
 #todo: yaml
 resolvers = {
@@ -33,7 +32,7 @@ def mtr_report(ip_address):
     mtr_json = loads(mtr_result.stdout.strip())
     last_hop = mtr_json['report']['hubs'][-1]
 
-    return f"Hops: {last_hop['count']} - Loss: {last_hop['Loss%']}% - Last: {last_hop['Last']} - Avg: {last_hop['Avg']} - Best: {last_hop['Best']} - Worst: {last_hop['Wrst']} - StdDev: {last_hop['StDev']}"
+    return f"Hops: {last_hop['count']} - Loss: {last_hop['Loss%']}% - Last: {last_hop['Last']}ms - Avg: {last_hop['Avg']}ms - Best: {last_hop['Best']}ms - Worst: {last_hop['Wrst']}ms - StdDev: {last_hop['StDev']}ms"
 
 dns_ctx = Resolver(configure=False)
 for resolver in resolvers:
@@ -43,7 +42,7 @@ for resolver in resolvers:
     print(f"Testing {resolver}")
     mtr = mtr_report(resolvers[resolver][0])
     if not mtr:
-        print("Resolver wasn't reachable by ICMP, skipping")
+        print(f"Resolver {resolver} is not accepting ICMP, skipping")
         continue
 
     print(mtr)
@@ -51,21 +50,17 @@ for resolver in resolvers:
 
     for resolver_test in resolver_tests:
         try:
-            #Not sure how accurate this method of measurement is
-            #Support v6?
-            dns_start = utime()
             query = dns_ctx.query(resolver_tests[resolver_test], 'a')
-            dns_end = utime()
             primary_ip = query[0]
-            query_response = round(dns_end - dns_start, 4)
+            query_response = query.response.time * 1000.0
         except:
             print(f"Unable to resolve {resolver_tests[resolver_test]}, skipping")
 
-        print(f"{resolver_tests[resolver_test]} ({resolver_test}) resolved to {primary_ip} in {query_response}s")
+        print(f"{resolver_tests[resolver_test]} ({resolver_test}) resolved to {primary_ip} in {query_response:.2f}ms")
         mtr = mtr_report(primary_ip.to_text())
         if mtr:
             print(mtr)
         else:
-            print("Target wasn't reachable by ICMP")
+            print(f"Resolve test {resolver_tests[resolver_test]} is not accepting ICMP, skipping")
 
     print(' ')
