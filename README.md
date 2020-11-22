@@ -10,7 +10,6 @@ dnsbench and other programs just test how quickly a result is returned, which is
 * The path to your resolver is also important (number of hops / what networks its going through / general latency).
 
 # TODO
-- [ ] Linux support, just needs a check that mtr is installed
 - [ ] v6 support??
 - [ ] Add more resolvers
 - [ ] Add more CDNs tests
