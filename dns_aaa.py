@@ -17,8 +17,16 @@ resolver_tests = {
     "CloudFlare": "pkg.cloudflare.com"
 }
 
+MTR_LOCATION = 'mtr'
+if platform == "win32":
+    MTR_LOCATION = 'mtr_binary/mtr.exe'
+
 def mtr_report(ip_address):
-    mtr_result = sub_run(['mtr_binary/mtr', '--show-ips', '--json', '-c', '5', ip_address], capture_output=True)
+    try:
+        mtr_result = sub_run(['mtr_binary/mtr', '--show-ips', '--json', '-c', '5', ip_address], capture_output=True)
+    except:
+        return False
+
     if mtr_result.returncode != 0:
         return False
 
