@@ -23,7 +23,7 @@ if platform == "win32":
 
 def mtr_report(ip_address):
     try:
-        mtr_result = sub_run(['mtr_binary/mtr', '--show-ips', '--json', '-c', '5', ip_address], capture_output=True)
+        mtr_result = sub_run([MTR_LOCATION, '--show-ips', '--json', '-c', '5', ip_address], capture_output=True)
     except:
         return False
 
